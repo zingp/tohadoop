@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"sync/atomic"
-
 	"github.com/astaxie/beego/logs"
 )
 
@@ -38,15 +37,14 @@ func genRsyncLogObj(remoteAddr string, localAddr string, logName string) {
 	// 获取一小时前日志的名称
 	lastHourLog := fmt.Sprintf("%s.%s", appConf.logName, timeStamp)
 	// rsync 命令格式
-	// rsyncCmdFmt := `rsync -avzP rsync.%s::odin%s%s %s%s`
 	rsyncCmdFmt := `rsync -avzP %s::odin%s%s %s%s`
 	for k, v := range hostMap {
 		localLogName := fmt.Sprintf("%s.%s", k, lastHourLog)
 		rsyncCmd := fmt.Sprintf(rsyncCmdFmt, k, remoteAddr, lastHourLog, localAddr, localLogName)
 
 		hostObj := &Host{
-			Domain: k,
-			IP:     v,
+			Domain: v,
+			IP:     k,
 		}
 		rsyncLogObj := &rsyncLog{
 			host:      hostObj,
@@ -61,7 +59,7 @@ func genRsyncLogObj(remoteAddr string, localAddr string, logName string) {
 
 func (r *rsyncLog) Process() {
 
-	// fmt.Println("rsync:", r.rsyncCmd)
+	fmt.Println("rsync:", r.rsyncCmd)
 	_, err := ExecCmdLocal(r.rsyncCmd)
 	if err != nil {
 		logs.Error("execute cmd:%s error:%v", r.rsyncCmd, err)
@@ -92,14 +90,16 @@ func (lzo *lzopLog) Process() {
 	logs.Info("execute cmd:%s success", lzo.lzoCmd)
 
 	hdfsLogFile := fmt.Sprintf(`%s%s/%s/`, appConf.hdfs, timeMon, timeDay)
-	hadpLogObj := &hadpLog{
-		host:   lzo.host,
-		lzoLog: lzo.lzoLog,
-		hdfs:   hdfsLogFile,
-		putCmd: fmt.Sprintf(`%s fs -put %s %s`, appConf.hadoopClient, lzo.lzoLog, hdfsLogFile),
-	}
 
-	hadpChan <- hadpLogObj
+	for i:=0;i<len(appConf.hadoopClients);i++ {
+		hadpLogObj := &hadpLog{
+			host:   lzo.host,
+			lzoLog: lzo.lzoLog,
+			hdfs:   hdfsLogFile,
+			putCmd: fmt.Sprintf(`%s fs -put %s %s`, appConf.hadoopClients[i], lzo.lzoLog, hdfsLogFile),
+		}
+		hadpChan <- hadpLogObj
+	}
 }
 
 func (h *hadpLog) Process() {

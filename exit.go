@@ -1,7 +1,10 @@
 package main
 
 import (
+	"os"
+	"fmt"
 	"time"
+	"path"
 	"github.com/astaxie/beego/logs"
 )
 
@@ -13,15 +16,29 @@ func goroutineExit() {
 	defer close(rsyncChan)
 
 	ticker := time.NewTicker(5 * time.Second)
+	delPath := path.Dir(path.Dir(appConf.localAddr))
+	delCmdFmt := `/usr/bin/find %s -name "*.log.*"|grep %s |xargs rm -f`
+	delCmd := fmt.Sprintf(delCmdFmt, delPath, timeStamp)
 	for range ticker.C {
 
 		if int(time.Now().Unix()-timeStart) > (appConf.timeout * 60) {
-			logs.Error("timeout:", appConf.timeout)
+			_, err := ExecCmdLocal(delCmd)
+			if err != nil {
+				logs.Error("execute cmd:%s error:%v", delCmd, err)
+				return
+			}
+			logs.Error("timeout: more than %s mins. delete local logs success! del cmd: %s.", appConf.timeout, delCmd)
+			os.Exit(0)
 			return
 		}
 
-		if sucessNum == int32(len(hostMap)) {
-			logs.Info("all done.")
+		if sucessNum == int32(len(appConf.hadoopClients)*len(hostMap)) {
+			_, err := ExecCmdLocal(delCmd)
+			if err != nil {
+				logs.Error("execute cmd:%s error:%v", delCmd, err)
+				return
+			}
+			logs.Info("Push all log success! delete local logs success! del cmd: %s.", delCmd)
 			return
 		}
 	}

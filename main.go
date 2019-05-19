@@ -60,7 +60,6 @@ func init() {
 	if err != nil {
 		fmt.Printf("get host map failed:%v\n", err)
 	}
-	fmt.Println("len:", len(hostMap))
 }
 
 func main() {
