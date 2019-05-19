@@ -36,7 +36,7 @@ func GetHostMap(file string) (err error) {
 		if err != nil {
 			continue
 		}
-		
+
 		line = strings.TrimSpace(line)
 		if len(line) == 0 {
 			continue

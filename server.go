@@ -2,8 +2,8 @@ package main
 
 import (
 	"fmt"
-	"sync/atomic"
 	"github.com/astaxie/beego/logs"
+	"sync/atomic"
 )
 
 type Host struct {
@@ -91,7 +91,7 @@ func (lzo *lzopLog) Process() {
 
 	hdfsLogFile := fmt.Sprintf(`%s%s/%s/`, appConf.hdfs, timeMon, timeDay)
 
-	for i:=0;i<len(appConf.hadoopClients);i++ {
+	for i := 0; i < len(appConf.hadoopClients); i++ {
 		hadpLogObj := &hadpLog{
 			host:   lzo.host,
 			lzoLog: lzo.lzoLog,
@@ -132,7 +132,7 @@ func lzopToLocal() {
 	for {
 		lLog, ok := <-lzopChan
 		if !ok {
-				return
+			return
 		}
 		lLog.Process()
 	}

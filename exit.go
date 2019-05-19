@@ -1,11 +1,11 @@
 package main
 
 import (
-	"os"
 	"fmt"
-	"time"
-	"path"
 	"github.com/astaxie/beego/logs"
+	"os"
+	"path"
+	"time"
 )
 
 // 超时或者日志上传完毕关闭管道，退出各个goroutine

@@ -10,12 +10,12 @@ import (
 
 //AppConf 存放配置文件
 type AppConf struct {
-	remoteAddr   string
-	localAddr    string
-	lzopAddr     string
-	logName      string
+	remoteAddr    string
+	localAddr     string
+	lzopAddr      string
+	logName       string
 	hadoopClients []string
-	hdfs         string
+	hdfs          string
 
 	logFile   string
 	hostFile  string
@@ -61,7 +61,7 @@ func initDir(dir string) {
 func initHadoopDir() {
 	hdfs := fmt.Sprintf(`%s%s/%s`, appConf.hdfs, timeMon, timeDay)
 	cmdFmt := `if ! %s fs -ls %s >/dev/null 2>&1;then %s fs -mkdir -p %s;fi`
-	for i:=0;i<len(appConf.hadoopClients);i++{
+	for i := 0; i < len(appConf.hadoopClients); i++ {
 		cmd := fmt.Sprintf(cmdFmt, appConf.hadoopClients[i], hdfs, appConf.hadoopClients[i], hdfs)
 		// fmt.Printf("CMD:%s\n", cmd)
 		_, err := ExecCmdLocal(cmd)
@@ -69,5 +69,5 @@ func initHadoopDir() {
 			logs.Error("init hadoop dir:%s failed:%v", hdfs, err)
 			return
 		}
-	}	
+	}
 }
